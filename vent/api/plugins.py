@@ -568,6 +568,7 @@ class Plugin:
                     name = (True, image_name)
                 # pull if '/' in image_name, fallback to build
                 pull = False
+                output = ""
                 if '/' in image_name and not build_local:
                     try:
                         self.logger.info("Trying to pull " + image_name)
@@ -662,8 +663,9 @@ class Plugin:
                     if multi_instance:
                         set_instances(template, section, 'yes', image_id)
             except Exception as e:  # pragma: no cover
+                self.logger.info("current working directory: " + str(os.getcwd()))
                 self.logger.error("unable to build image: " + str(image_name) +
-                                  " because: " + str(e))
+                                  " because: " + str(e) + " and " + str(output))
                 template.set_option(section, "built", "failed")
                 template.set_option(section, "last_updated",
                                     str(datetime.utcnow()) + " UTC")
@@ -995,6 +997,14 @@ class Plugin:
                 c_dict = {}
                 with open(self.plugin_config_file) as config_file:
                     c_dict = yaml.safe_load(config_file.read())
+
+            # check for environment variable overrides
+            check_c_dict = c_dict.copy()
+            for tool in check_c_dict:
+                for section in check_c_dict[tool]:
+                    for key in check_c_dict[tool][section]:
+                        if key in os.environ:
+                            c_dict[tool][section][key] = os.getenv(key)
 
             # assume the name of the plugin is its directory
             plugin_name = path.split('/')[-1]

@@ -8,16 +8,15 @@ vent
 [![Documentation Status](https://readthedocs.org/projects/vent/badge/?version=latest)](http://vent.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/vent.svg)](https://badge.fury.io/py/vent)
 [![codecov](https://codecov.io/gh/CyberReboot/vent/branch/master/graph/badge.svg)](https://codecov.io/gh/CyberReboot/vent)
-[![Github Release Downloads](https://img.shields.io/github/downloads/cyberreboot/vent/total.svg?maxAge=2592000)](https://github.com/CyberReboot/vent/releases)
 [![Docker Hub Downloads](https://img.shields.io/docker/pulls/cyberreboot/vent-elasticsearch.svg)](https://hub.docker.com/u/cyberreboot)
 
 ![Vent Logo](/docs/img/vent-logo.png)
 
 overview
 ====
-vent is a library that includes a CLI designed to serve as a general platform for analyzing network traffic. built with some basic functionality, vent serves as a user-friendly platform to build custom `plugins` on to perform user-defined processing on incoming network data. vent supports any filetype, but only processes ones based on the types of plugins installed for that instance of vent.
+vent is a library that includes a CLI designed to serve as a general platform for analyzing network traffic. Built with some basic functionality, vent serves as a user-friendly platform to build custom `plugins` that perform user-defined processing on incoming network data. vent is filetype-agnostic in that the plugins installed within your specific vent instance determine what type of files your instance supports.
 
-simply create your `plugins`, point vent to them & install them, and drop a file in vent to begin processing!
+Simply create your `plugins`, point vent to them & install them, and drop a file in vent to begin processing!
 
 ### dependencies
 
@@ -46,7 +45,12 @@ pip install vent
 ```
 git clone https://github.com/CyberReboot/vent.git
 cd vent
-make # (sudo may be required to install the vent command in the system bin path)
+```
+
+Root/sudo users can simply run `make` to compile and install the platform.  Users with limited permissions or require user-local installation can use the following:
+
+```
+sudo env "PATH=$PATH" make
 ```
 
 _Note - If you already have `docker-py` installed on your machine, you may need to_ `pip uninstall docker-py` _first. `vent` will install `docker-py` as part of the installation process, however there are known incompatibilities of `docker-py` with older versions._

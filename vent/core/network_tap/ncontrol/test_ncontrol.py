@@ -27,6 +27,13 @@ def test_create_r():
                                          'nic': 'eth1'},
                       headers={'Content-Type': 'application/json'})
     assert r.status == 200
+    r = test_app.post('/create', params={'id': 'foo',
+                                         'interval': '60',
+                                         'iters': '1',
+                                         'filter': '',
+                                         'nic': 'eth1'},
+                      headers={'Content-Type': 'application/json'})
+    assert r.status == 200
     r = test_app.post('/create', params={})
     assert r.status == 200
     r = test_app.post('/create', params={'nic': 'eth1'})
@@ -34,9 +41,17 @@ def test_create_r():
     r = test_app.post('/create', params={'nic': 'eth1', 'id': 'foo'})
     assert r.status == 200
     r = test_app.post(
-        '/create', params={'nic': 'eth1', 'id': 'foo', 'interval': '60'})
+        '/create', params={'nic': 'eth1', 'id': 'foo', 'interval': '61'})
     assert r.status == 200
     r = test_app.post('/create', params='{}')
+    assert r.status == 200
+    r = test_app.post('/create', params={'id': 'foo',
+                                         'interval': '60',
+                                         'filter': '',
+                                         'metadata': '{"foo": "bar"}',
+                                         'iters': '1',
+                                         'nic': 'eth1'},
+                      headers={'Content-Type': 'application/json'})
     assert r.status == 200
 
 
@@ -57,6 +72,7 @@ def test_stop_r():
 
     # create some container and start it
     d = docker.from_env()
+    d.images.pull('alpine')
     test_cont = d.containers.create('alpine')
 
     # test stop
@@ -75,6 +91,7 @@ def test_start_r():
 
     # create some container
     d = docker.from_env()
+    d.images.pull('alpine')
     test_cont = d.containers.create('alpine')
 
     # test start
@@ -93,6 +110,7 @@ def test_delete_r():
 
     # create some container and start it
     d = docker.from_env()
+    d.images.pull('alpine')
     test_cont = d.containers.create('alpine')
 
     # test delete

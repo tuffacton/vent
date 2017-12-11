@@ -4,36 +4,35 @@ def gpu_queue(options):
     """
     import docker
     import json
+    import os
     import time
 
     from vent.helpers.meta import GpuUsage
 
     status = (False, None)
 
+    path_dir = "/vent"
+
     print("gpu queue", str(options))
-    print("gpu queue", str(GpuUsage(base_dir="/vent/",
-                                    meta_dir="/vent")))
+    print("gpu queue", str(GpuUsage(base_dir=path_dir+"/",
+                                    meta_dir=path_dir)))
 
     options = json.loads(options)
     configs = options['configs']
     gpu_options = configs['gpu_options']
     devices = []
 
-    print(str(configs['devices']))
     # device specified, remove all other devices
     if 'device' in gpu_options:
         dev = '/dev/nvidia' + gpu_options['device'] + ':/dev/nvidia'
         dev += gpu_options['device'] + ':rwm'
         if 'devices' in configs:
             d = list(configs['devices'])
-            print(str(d))
             for device in d:
-                print(dev + " compared to " + device)
                 if any(str.isdigit(str(char)) for char in device):
                     if dev == device:
                         devices.append(device)
                     else:
-                        print(dev + " doesn't match, removing: " + device)
                         configs['devices'].remove(device)
     else:
         d = configs['devices']
@@ -61,7 +60,7 @@ def gpu_queue(options):
     print("dedicated: ", dedicated)
     device = None
     while not device:
-        usage = GpuUsage(base_dir="/vent/", meta_dir="/vent")
+        usage = GpuUsage(base_dir=path_dir+"/", meta_dir=path_dir)
 
         if usage[0]:
             usage = usage[1]
@@ -120,7 +119,6 @@ def gpu_queue(options):
         del configs['gpu_options']
         params = options.copy()
         params.update(configs)
-        print(str(params))
         d_client.containers.run(**params)
         status = (True, None)
     except Exception as e:  # pragma: no cover
@@ -153,6 +151,7 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
     images = []
     configs = {}
     logger = Logger(__name__)
+
     try:
         d_client = docker.from_env()
 
@@ -196,6 +195,7 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
         failed_images = set()
         config = ConfigParser.RawConfigParser()
         config.optionxform = str
+        print("Path to manifest: "+ template_path+'plugin_manifest.cfg')
         config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
         name_maps = {}
@@ -425,7 +425,6 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
                 else:
                     if 'gpu_options' in configs[image]:
                         del configs[image]['gpu_options']
-                    print(str(configs[image]))
                     d_client.containers.run(image=image,
                                             command=path_cmd[image],
                                             labels=labels,
@@ -441,6 +440,5 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
         print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
         print("Failed to process job: " + str(e))
 
-    print(str(configs))
     print(str(status))
     return status
